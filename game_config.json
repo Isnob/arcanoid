@@ -1,0 +1,52 @@
+{
+  "game": {
+    "title": "Arcanoid",
+    "version": "1.0",
+    "max_players": 1,
+    "initial_lives": 3,
+    "difficulty_levels": ["easy", "medium", "hard"]
+  },
+  "window": {
+    "width": 960,
+    "height": 640,
+    "fps": 60,
+    "background_color": [20, 24, 36],
+    "text_color": [235, 235, 235]
+  },
+  "paddle": {
+    "width": 120,
+    "height": 16,
+    "speed": 420,
+    "color": [80, 200, 220]
+  },
+  "ball": {
+    "radius": 10,
+    "speed": 520,
+    "color": [255, 255, 255]
+  },
+  "bricks": {
+    "rows": 6,
+    "cols": 10,
+    "height": 22,
+    "padding": 8,
+    "top_offset": 80,
+    "colors": [[243, 86, 112], [255, 191, 71], [117, 214, 164]]
+  },
+  "difficulty": {
+    "easy": {
+      "ball_speed": 0.9,
+      "paddle_speed": 1.05,
+      "brick_strength": 1
+    },
+    "medium": {
+      "ball_speed": 1.0,
+      "paddle_speed": 1.0,
+      "brick_strength": 1
+    },
+    "hard": {
+      "ball_speed": 1.15,
+      "paddle_speed": 0.9,
+      "brick_strength": 2
+    }
+  }
+}
