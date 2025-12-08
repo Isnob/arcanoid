@@ -24,8 +24,13 @@ BRICK_COLS = 10
 BRICK_HEIGHT = 22
 BRICK_PADDING = 8
 BRICK_TOP_OFFSET = 80
-BRICK_COLORS = [(243, 86, 112), (255, 191, 71), (117, 214, 164)]
-BRICK_STRENGTH = 1
+BRICK_STRENGTH_MIN = 1
+BRICK_STRENGTH_MAX = 3
+BRICK_COLORS = {
+    1: (243, 86, 112),
+    2: (255, 191, 71),
+    3: (117, 214, 164),
+}
 
 INITIAL_LIVES = 3
 
@@ -91,14 +96,29 @@ class Ball(pygame.sprite.Sprite):
         if self.rect.top <= 0:
             self.velocity[1] *= -1
 
+    def bounce_off_paddle(self, paddle):
+        # Смещаем угол отскока в зависимости от точки касания
+        relative_intersect_x = self.rect.centerx - paddle.rect.centerx
+        normalized_offset = relative_intersect_x / (paddle.rect.width / 2)
+        normalized_offset = max(-1, min(1, normalized_offset))
+
+        max_bounce_angle = math.radians(70)
+        angle = normalized_offset * max_bounce_angle
+
+        speed = math.hypot(*self.velocity) or self.speed
+        self.velocity[0] = speed * math.sin(angle)
+        self.velocity[1] = -speed * math.cos(angle)
+        self.rect.bottom = paddle.rect.top - 1
+
 
 class Brick(pygame.sprite.Sprite):
     def __init__(self, x, y, color, strength):
         super().__init__()
         brick_width = (WINDOW_WIDTH - BRICK_PADDING * (BRICK_COLS + 1)) // BRICK_COLS
         self.image = pygame.Surface([brick_width, BRICK_HEIGHT])
-        self.color = color
+        self.base_color = color
         self.strength = strength
+        self.max_strength = strength
         self.update_color()
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -106,8 +126,9 @@ class Brick(pygame.sprite.Sprite):
     
     def update_color(self):
         # Делаем кирпич темнее с каждым ударом
-        factor = 0.5 + 0.5 * (self.strength / BRICK_STRENGTH)
-        color = [int(c * factor) for c in self.color]
+        health_ratio = self.strength / self.max_strength
+        factor = 0.45 + 0.55 * health_ratio
+        color = [int(c * factor) for c in self.base_color]
         self.image.fill(color)
 
     def hit(self):
@@ -143,8 +164,9 @@ class Game:
             for col in range(BRICK_COLS):
                 x = BRICK_PADDING + col * (brick_width + BRICK_PADDING)
                 y = BRICK_TOP_OFFSET + row * (BRICK_HEIGHT + BRICK_PADDING)
-                color = BRICK_COLORS[row % len(BRICK_COLORS)]
-                brick = Brick(x, y, color, BRICK_STRENGTH)
+                strength = random.randint(BRICK_STRENGTH_MIN, BRICK_STRENGTH_MAX)
+                color = BRICK_COLORS.get(strength, list(BRICK_COLORS.values())[-1])
+                brick = Brick(x, y, color, strength)
                 self.all_sprites.add(brick)
                 self.bricks.add(brick)
 
@@ -171,9 +193,8 @@ class Game:
         self.all_sprites.update(dt)
 
         # Коллизия мяча с ракеткой
-        if pygame.sprite.collide_rect(self.ball, self.paddle):
-            self.ball.velocity[1] *= -1
-            self.ball.rect.bottom = self.paddle.rect.top
+        if pygame.sprite.collide_rect(self.ball, self.paddle) and self.ball.velocity[1] > 0:
+            self.ball.bounce_off_paddle(self.paddle)
 
         # Коллизия мяча с кирпичами
         hit_bricks = pygame.sprite.spritecollide(self.ball, self.bricks, False)
