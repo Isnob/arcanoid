@@ -108,3 +108,7 @@
   - `config.py`, `config.json` — настройки размеров/скоростей/палитры.
 - Ресурсы: каталог `sounds` (эффекты удара/разрушения/победы/поражения), `sprites/__init__.py` для экспорта классов.
 - Структура организации: корень проекта → код (`*.py`), конфиг (`config.json`), ресурсы (`sounds`), зависимости (`requirements.txt`), документация (`report.md`).
+
+
+GITHUB REPO:
+https://github.com/Isnob/arcanoid
